@@ -2,6 +2,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy import Integer, String, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
+from typing import Optional
 from database import Model
 
 class UserAccount(Model):
@@ -18,7 +19,7 @@ class UserAccount(Model):
     logged_sessions: Mapped[list['UserSession']] = relationship(back_populates='account')
 
 class UserLoginInfo(Model):
-    account_id: Mapped[int] = mapped_column(ForeignKey('UserAccount.account_id'),
+    account_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id),
                                     primary_key=True)
     passwd_hash: Mapped[bytes] = mapped_column(String(128), nullable=False)
 
@@ -26,9 +27,9 @@ class UserLoginInfo(Model):
 
 class UserSession(Model):
     id: Mapped[bytes] = mapped_column('session_id', BINARY(44), primary_key=True)
-    session_id: Mapped[int] = mapped_column(ForeignKey('UserAccount.account_id'),
+    account_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id),
                                             unique=True)
 
-    account: Mapped['UserAccount'] = relationship(back_populates='logged_sessions')
+    account: Mapped[Optional['UserAccount']] = relationship(back_populates='logged_sessions')
 
 
