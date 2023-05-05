@@ -1,7 +1,7 @@
 from flask import Blueprint, request, Response, make_response, abort
 import werkzeug.exceptions
 from .csrf_token import check_csrf_token
-from .auth import create_session, close_session, get_active_session, active_session_decorator as active_session
+from .auth import create_user_session, close_active_session, active_session_decorator as active_session
 from database import db
 
 bp = Blueprint('api_session', __name__, url_prefix='/api/session')
@@ -10,7 +10,8 @@ bp = Blueprint('api_session', __name__, url_prefix='/api/session')
 def create():
     if not request.json:
         abort(400)
-    if any(not isinstance(request.json[i], str) for i in ('user', 'passwd', 'token')):
+    if any(i not in request.json or
+            not isinstance(request.json[i], str) for i in ('user', 'passwd', 'token')):
         abort(400)
 
     user = request.json['user']
@@ -22,17 +23,15 @@ def create():
             session.commit()
             return {'success': False, 'reason':'Invalid login request token'}, 400
 
-        user_session = create_session(user, passwd)
+        user_session = create_user_session(user, passwd)
         if user_session is None:
             session.commit()
             return {'success': False, 'reason':'Invalid credentials'}, 401
 
+        token = user_session.id
         session.commit()
 
-    username, token = user_session
-
     response = make_response({'success':True, 'identifier':'cookies'})
-    response.set_cookie('user', secure=True, httponly=True, value=username)
     response.set_cookie('sid', secure=True, httponly=True, value=token)
 
     return response
@@ -40,18 +39,20 @@ def create():
 @bp.route('/close', methods=['DELETE'])
 @active_session
 def close():
-    response = Response(status=204) # 204 No Content
+    with db.session() as session:
+        close_active_session()
+        session.commit()
 
-    user, sid = get_active_session()
-    close_session(user, sid)
+    response = Response(status=204) # 204 No Content
+    response.set_cookie('sid', '', secure=True, httponly=True, expires=0)
 
     return response
 
-@bp.errorhandler(werkzeug.exceptions.Unauthorized)
-def api_unauthorized(error):
+def unauthorized_handler_json(error):
     return {
             'success': False,
             'reason': 'unauthorized'
             }, 401
 
 
+api_unauthorized = bp.errorhandler(werkzeug.exceptions.Unauthorized)(unauthorized_handler_json)

@@ -1,30 +1,29 @@
-from sqlalchemy import text
+from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from secrets import token_urlsafe
 from database import db
+from models import CSRF_Token
 
 def generate_csrf_token():
     for try_ in range(3):
         try:
-            csrf_token = token_urlsafe(64)
-            sql = text('INSERT INTO CSRF_TOKEN VALUES (:user_token)').\
-                    bindparams(user_token=csrf_token)
-            db.session.execute(sql)
-            return csrf_token
+            with db.session.begin_nested() as nested:
+                csrf_token = token_urlsafe(48)
+                db.session.add(CSRF_Token(token=csrf_token))
+                nested.commit()
+                return csrf_token
         except IntegrityError:
             pass
 
-    raise RuntimeError
+    raise RuntimeError('CSRF token not unique')
 
 def check_csrf_token(csrf_token):
-    sql = text('SELECT token from CSRF_TOKEN WHERE token=:user_token').\
-            bindparams(user_token=csrf_token)
-    token = db.session.execute(sql).scalar()
-
-    if token is None:
+    if len(csrf_token) != 64:
         return False
-    else:
-        sql = text('DELETE FROM CSRF_TOKEN WHERE token=:user_token').\
-            bindparams(user_token=csrf_token)
-        db.session.execute(sql)
-        return True
+    token = db.session.execute(delete(CSRF_Token)\
+                .filter(CSRF_Token.token == csrf_token)\
+                .returning(CSRF_Token.token)
+                ).one_or_none()
+
+    return token is not None
+
