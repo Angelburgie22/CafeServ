@@ -3,11 +3,12 @@ from sqlalchemy import Integer, String, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
 from typing import Optional
+from datetime import datetime as Datetime
 from database import Model
 
 class UserAccount(Model):
     id: Mapped[int] = mapped_column('account_id', Integer, primary_key=True)
-    creation_time: Mapped[str] = mapped_column(DateTime)
+    creation_time: Mapped[Datetime] = mapped_column(DateTime)
     status: Mapped[int] = mapped_column(TINYINT)
     email: Mapped[str] = mapped_column(String(40))
     username: Mapped[str] = mapped_column(String(24))
