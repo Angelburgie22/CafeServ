@@ -1,8 +1,9 @@
 from flask import request, abort
 from werkzeug.security import check_password_hash
-from sqlalchemy import delete
+from sqlalchemy import delete, func
 from sqlalchemy.exc import IntegrityError
 from secrets import token_urlsafe
+from datetime import datetime, timedelta
 from database import db
 from models import UserAccount, UserSession, UserLoginInfo
 import re
@@ -41,7 +42,8 @@ def create_user_session(user: str, passwd: str) -> UserSession | None:
             with db.session.begin_nested() as nested:
                 session_token = token_urlsafe(48)
 
-                user_session = UserSession(id=session_token, account_id=user_id)
+                user_session = UserSession(id=session_token, account_id=user_id,
+                                           expiration_time=datetime.now()+datetime.timedelta(week=1))
 
                 db.session.add(user_session)
                 nested.commit()
@@ -59,12 +61,14 @@ def get_cookie_sid():
 def get_active_session() -> UserSession:
     sid = get_cookie_sid()
     user_session = db.session.query(UserSession)\
+            .filter(CSRF_Token.expiration_time < func.now())\
             .filter(UserSession.id == sid).one()
     return user_session
 
 def check_active_session() -> bool:
     sid = get_cookie_sid()
     return db.session.query(UserSession)\
+            .filter(CSRF_Token.expiration_time < func.now())\
             .filter(UserSession.id == sid).count() != 0
 
 def close_active_session():

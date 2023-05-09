@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint, func
 from sqlalchemy import Integer, String, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
@@ -29,10 +29,14 @@ class UserLoginInfo(Model):
 class UserSession(Model):
     id: Mapped[bytes] = mapped_column('session_id', String(64), primary_key=True)
     account_id: Mapped[Optional[int]] = mapped_column(ForeignKey(UserAccount.id))
+    creation_time: Mapped[Datetime] = mapped_column(DateTime, server_default=func.now())
+    expiration_time: Mapped[Datetime] = mapped_column(DateTime)
 
     account: Mapped[Optional['UserAccount']] = relationship(back_populates='logged_sessions')
 
 class CSRF_Token(Model):
     __tablename__ = 'csrf_token'
     token: Mapped[bytes] = mapped_column('csrf_token', String(64), primary_key=True)
+    creation_time: Mapped[Datetime] = mapped_column(DateTime, server_default=func.now())
+    expiration_time: Mapped[Datetime] = mapped_column(DateTime)
 
