@@ -1,7 +1,8 @@
-from sqlalchemy import Table, Column, ForeignKey, func
+from sqlalchemy import Table, Column, ForeignKey, func, select
 from sqlalchemy import Integer, String, Boolean, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
+from view import view
 from typing import Optional
 from datetime import datetime as Datetime
 from database import Model
@@ -44,7 +45,7 @@ class CSRF_Token(Model):
 class Platillo(Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     nombre: Mapped[str] = mapped_column(String(40))
-    descripcion: Mapped[Optional[str]] = mapped_column(String(250))
+    descripcion: Mapped[str] = mapped_column(String(250), default='')
 
 class TipoAdimento(Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -60,8 +61,7 @@ class Adimento(Model):
     tipo_adimento: Mapped['TipoAdimento'] = relationship(back_populates='adimentos')
 
 
-class Platillo_Adimento(Model):
-    __tablename__ = 'platillo_adimento'
+class Platillo_UnAdimento(Model):
     platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
     adimento_id: Mapped[int] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
     allowed: Mapped[bool] = mapped_column(Boolean)
@@ -70,10 +70,31 @@ class Platillo_Adimento(Model):
     adimento: Mapped['Adimento'] = relationship()
 
 class Platillo_TipoAdimento(Model):
-    __tablename__ = 'platillo_tipo_adimento'
     platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
     tipo_adimento_id: Mapped[int] = mapped_column(ForeignKey(TipoAdimento.id), primary_key=True)
 
     platillo: Mapped['Platillo'] = relationship()
     tipo_adimento: Mapped['TipoAdimento'] = relationship()
+
+fulladim_subq = select(
+                        Platillo.id.label('id_platillo'),
+                        Adimento.id.label('id_adimento'),
+                        Adimento.nombre.label('nombre'),
+                        Platillo_UnAdimento.allowed.label('allowed')
+                    ).join(Platillo).join(Adimento)\
+                    .union(
+                            select(
+                                Platillo.id,
+                                Adimento.id,
+                                Adimento.nombre,
+                                True)
+                            .join(TipoAdimento).join(Platillo_TipoAdimento).join(Platillo)
+                        ).subquery()
+
+
+Platillo_Adimento = view('platillo_adimento', Model.metadata,
+                              select(fulladim_subq.c.id_platillo, fulladim_subq.c.id_adimento, fulladim_subq.c.nombre)
+                              .group_by(fulladim_subq.c.id_platillo, fulladim_subq.c.id_adimento)
+                              .having(func.min(fulladim_subq.c.allowed))
+                              )
 
