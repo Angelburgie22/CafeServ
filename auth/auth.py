@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from secrets import token_urlsafe
 from datetime import datetime, timedelta
 from database import db
-from models import UserAccount, UserSession, UserLoginInfo
+from models import UserAccount, UserSession, UserLoginInfo, CSRF_Token
 import re
 
 email_re = re.compile(r"([\w\d._+?!#$%&^'~|\/(){}=*-])+@(((?<=@)|\.)[\w\d]+){2,}")
@@ -61,15 +61,15 @@ def get_cookie_sid():
 def get_active_session() -> UserSession:
     sid = get_cookie_sid()
     user_session = db.session.query(UserSession)\
-            .filter(CSRF_Token.expiration_time < func.now())\
+            .filter(UserSession.expiration_time > func.now())\
             .filter(UserSession.id == sid).one()
     return user_session
 
 def check_active_session() -> bool:
     sid = get_cookie_sid()
-    return db.session.query(UserSession)\
-            .filter(CSRF_Token.expiration_time < func.now())\
-            .filter(UserSession.id == sid).count() != 0
+    return db.session.query(db.session.query(UserSession)\
+            .filter(UserSession.expiration_time > func.now())\
+            .filter(UserSession.id == sid).exists()).scalar()
 
 def close_active_session():
     db.session.execute(delete(UserSession)\
