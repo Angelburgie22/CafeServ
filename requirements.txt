@@ -2,3 +2,4 @@ Flask
 sqlalchemy
 pymysql
 Flask-SQLAlchemy
+pytest
