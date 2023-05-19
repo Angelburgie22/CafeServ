@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, make_response, abort
 import werkzeug.exceptions
-from .csrf_token import check_csrf_token
+from .csrf_token import check_csrf_token, generate_csrf_token
 from .auth import create_user_session, close_active_session, active_session_decorator as active_session
 from database import db
 
@@ -46,6 +46,12 @@ def close():
     response = Response(status=204) # 204 No Content
     response.set_cookie('sid', '', secure=True, httponly=True, expires=0)
 
+    return response
+
+@bp.route('/get_login_token')
+def get_login_token():
+    response = {'token': generate_csrf_token()}
+    db.session.commit()
     return response
 
 def unauthorized_handler_json(error):

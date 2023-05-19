@@ -43,7 +43,7 @@ def create_user_session(user: str, passwd: str) -> UserSession | None:
                 session_token = token_urlsafe(48)
 
                 user_session = UserSession(id=session_token, account_id=user_id,
-                                           expiration_time=datetime.now()+datetime.timedelta(week=1))
+                                           expiration_time=datetime.now()+timedelta(weeks=1))
 
                 db.session.add(user_session)
                 nested.commit()

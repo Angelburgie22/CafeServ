@@ -24,7 +24,7 @@ def check_csrf_token(csrf_token):
         return False
     token = db.session.execute(delete(CSRF_Token)\
                 .filter(CSRF_Token.token == csrf_token)\
-                .filter(CSRF_Token.expiration_time < func.now())\
+                .filter(CSRF_Token.expiration_time > func.now())\
                 .returning(CSRF_Token.token)
                 ).one_or_none()
 
