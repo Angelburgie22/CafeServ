@@ -17,11 +17,14 @@ def generate_csrf_token():
         except IntegrityError:
             pass
 
+    # Si hay 3 colisiones de token, abortar
     raise RuntimeError('CSRF token not unique')
 
 def check_csrf_token(csrf_token):
     if len(csrf_token) != 64:
         return False
+
+    # El uso de un token automáticamente lo invalida
     token = db.session.execute(delete(CSRF_Token)\
                 .filter(CSRF_Token.token == csrf_token)\
                 .filter(CSRF_Token.expiration_time > func.now())\

@@ -19,6 +19,8 @@ def create():
     csrf_token = request.json['token']
 
     with db.session() as session:
+        # El uso de token CSRF es más común en aplicaciones HTML, debido a ataques CSRF.
+        # Aquí se añade para una futura compatibilidad web y protección extra.
         if not check_csrf_token(csrf_token):
             session.commit()
             return {'success': False, 'reason':'Invalid login request token'}, 400
