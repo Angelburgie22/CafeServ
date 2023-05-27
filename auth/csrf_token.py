@@ -11,7 +11,7 @@ def generate_csrf_token():
             with db.session.begin_nested() as nested:
                 csrf_token = token_urlsafe(48)
                 db.session.add(CSRF_Token(token=csrf_token,
-                                          expiration_time=datetime.now()+timedelta(hours=6)))
+                                          expiration_time=func.datetime(func.now(), '+6 hours')))
                 nested.commit()
                 return csrf_token
         except IntegrityError:

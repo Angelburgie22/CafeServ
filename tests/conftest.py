@@ -9,15 +9,12 @@ from models import *
 @pytest.fixture
 def app():
     app = create_app(default_config | {
-        'database_uri': f'mysql+pymysql://mysql:{os.environ["MARIADB_PASSWD"]}@localhost/test_cafeserv?charset=utf8mb4',
+        'database_uri': f'sqlite:///test_database.db',
     })
 
     with app.app_context():
         session = db.session
-        session.execute(sqlalchemy.text('DROP DATABASE test_cafeserv'))
-        session.execute(sqlalchemy.text('CREATE DATABASE test_cafeserv'))
-        session.execute(sqlalchemy.text('USE test_cafeserv'))
-
+        metadata.drop_all(bind=db.engine)
         metadata.create_all(bind=db.engine)
 
         users = [

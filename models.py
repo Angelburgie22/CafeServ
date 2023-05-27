@@ -1,7 +1,6 @@
 from sqlalchemy import Table, Column, ForeignKey, func, select
 from sqlalchemy import Integer, String, Boolean, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy.dialects.mysql import TINYINT
 from view import view
 from typing import Optional
 from datetime import datetime as Datetime
@@ -10,7 +9,7 @@ from database import Model
 class UserAccount(Model):
     id: Mapped[int] = mapped_column('account_id', Integer, primary_key=True)
     creation_time: Mapped[Datetime] = mapped_column(DateTime)
-    status: Mapped[int] = mapped_column(TINYINT)
+    status: Mapped[int] = mapped_column(Integer)
     email: Mapped[str] = mapped_column(String(40))
     username: Mapped[str] = mapped_column(String(24))
     nombre: Mapped[str] = mapped_column(String(32))
