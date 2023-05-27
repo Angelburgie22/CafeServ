@@ -11,7 +11,10 @@ def info_platillo(platillo_id):
     platillo = session.get(Platillo, platillo_id)
 
     if platillo is None:
-        return '', 404
+        return {
+                'success':False,
+                'reason': 'Invalid id',
+                }, 404
 
     adimentos = session.query(Platillo_Adimento.c.id_adimento, Platillo_Adimento.c.nombre)\
                     .filter(Platillo_Adimento.c.id_platillo == platillo.id)

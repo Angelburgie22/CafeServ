@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, ForeignKey, func, select
+from sqlalchemy import Table, Column, ForeignKey, UniqueConstraint, func, select
 from sqlalchemy import Integer, String, Boolean, DateTime, BINARY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
@@ -43,7 +43,7 @@ class CSRF_Token(Model):
 
 
 class Platillo(Model):
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column('platillo_id', Integer, primary_key=True)
     nombre: Mapped[str] = mapped_column(String(40))
     descripcion: Mapped[str] = mapped_column(String(250), default='')
 
@@ -97,4 +97,16 @@ Platillo_Adimento = view('platillo_adimento', Model.metadata,
                               .group_by(fulladim_subq.c.id_platillo, fulladim_subq.c.id_adimento)
                               .having(func.min(fulladim_subq.c.allowed))
                               )
+
+class Pedido(Model):
+    id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id))
+    status: Mapped[int] = mapped_column(TINYINT)
+
+class Pedido_Platillo(Model):
+    pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), primary_key=True)
+    platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
+    adimento_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
+    cantidad: Mapped[int] = mapped_column(Integer)
+
 
