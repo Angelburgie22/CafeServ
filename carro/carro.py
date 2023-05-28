@@ -1,6 +1,4 @@
-from Models import Carro, Carro_Platillo, Carro_Platillo_Adimento
+from models import Pedido, Pedido_Platillo
 from .bp import bp
 
 @bp.route('/carro/add')
-
-
