@@ -1,7 +1,7 @@
 from database import metadata, db
 import models
-from app import app
+from app import create_app
 
-with app.app_context():
+with create_app().app_context():
     metadata.create_all(bind=db.engine)
 
