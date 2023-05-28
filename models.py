@@ -100,7 +100,7 @@ Platillo_Adimento = view('platillo_adimento', Model.metadata,
 
 class Pedido(Model):
     id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id))
+    user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id), unique=True)
     status: Mapped[int] = mapped_column(TINYINT)
 
 class Pedido_Platillo(Model):
