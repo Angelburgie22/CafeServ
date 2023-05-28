@@ -1,11 +1,12 @@
 from flask import Flask, request, abort, redirect, url_for
 from auth.session import bp as session_bp
 from carta.info_platillos import bp as info_platillos_bp
+from carro.carro import bp as carro_bp
 import os
 from database import db
 
 default_config = {
-        'database_uri': f'mysql+pymysql://mysql:{os.environ["MARIADB_PASSWD"]}@localhost/cafeserv?charset=utf8mb4',
+        'database_uri': f'mysql+pymysql://adminuser:{os.environ["MARIADB_PASSWD"]}@localhost/cafeserv?charset=utf8mb4',
         'database_echo': True,
         'flask_app_name': __name__
         }
@@ -20,6 +21,6 @@ def create_app(config=default_config):
 
     app.register_blueprint(session_bp)
     app.register_blueprint(info_platillos_bp)
+    app.register_blueprint(carro_bp)
 
     return app
-

@@ -99,22 +99,25 @@ Platillo_Adimento = view('platillo_adimento', Model.metadata,
                               )
 
 class Pedido(Model):
-    id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id), unique=True)
+    id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True, unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id))
     status: Mapped[int] = mapped_column(TINYINT)
 
 class Pedido_Platillo(Model):
-    id: Mapped[int] = mapped_column('pedido_platillo_id', Integer, primary_key=True)
-    pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), primary_key=True)
+    id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), primary_key=True)
     platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
     cantidad: Mapped[int] = mapped_column(Integer)
+
+
+    adimentos: Mapped[list["Pedido_Platillo_Adimento"]] = relationship()
+
+class Pedido_Platillo_Adimento(Model):
+    pedido_platillo_id: Mapped[int] = mapped_column(ForeignKey(Pedido_Platillo.id), primary_key=True)
+    adimento_id: Mapped[int] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
 
 class Pedido_Ubicacion(Model):
     ubicacion_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     coord_x: Mapped[float] = mapped_column(Float)
-    coord_y: Mappped[float] = mapped_column(Float)
+    coord_y: Mapped[float] = mapped_column(Float)
     pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), unique=True)
 
-class Pedido_Platillo_Adimento(Model):
-    pedido_platillo_id: Mapped[int] = mapped_column(ForeignKey(Pedido_Platillo.id), primary_key=True)
-    adimento_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Adimento.id), primary_key=True)

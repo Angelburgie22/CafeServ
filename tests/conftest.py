@@ -9,7 +9,7 @@ from models import *
 @pytest.fixture
 def app():
     app = create_app(default_config | {
-        'database_uri': f'mysql+pymysql://mysql:{os.environ["MARIADB_PASSWD"]}@localhost/test_cafeserv?charset=utf8mb4',
+        'database_uri': f'mysql+pymysql://root:{os.environ["MARIADB_PASSWD"]}@localhost/test_cafeserv?charset=utf8mb4',
     })
 
     with app.app_context():
@@ -36,6 +36,14 @@ def app():
             user_login = UserLoginInfo(passwd_hash=passwd_hash, account=user)
             session.add(user)
 
+
+        tipo_salsa = TipoAdimento(nombre='Salsa')
+        salsa_roja = Adimento(nombre='Salsa roja', tipo_adimento=tipo_salsa)
+        salsa_verde = Adimento(nombre='Salsa verde', tipo_adimento=tipo_salsa)
+        salsa_habanera = Adimento(nombre='Salsa habanera', tipo_adimento=tipo_salsa)
+
+        session.add(tipo_salsa)
+
         tipo_leche = TipoAdimento(nombre='Leche')
 
         leche_entera = Adimento(nombre='Leche entera', tipo_adimento=tipo_leche)
@@ -44,6 +52,11 @@ def app():
         leche_semides = Adimento(nombre='Leche semideslactosada', tipo_adimento=tipo_leche)
 
         session.add(tipo_leche)
+
+        huevos = Platillo(nombre='Huevos')
+        session.add(Platillo_UnAdimento(platillo=huevos, adimento=salsa_roja, allowed=True))
+        session.add(Platillo_UnAdimento(platillo=huevos, adimento=salsa_verde, allowed=True))
+        session.add(Platillo_UnAdimento(platillo=huevos, adimento=salsa_habanera, allowed=True))
 
         crepa = Platillo(nombre='Crepa')
         session.add(Platillo_TipoAdimento(platillo=crepa, tipo_adimento=tipo_leche))
@@ -54,11 +67,9 @@ def app():
         session.add(Platillo_UnAdimento(platillo=cafe, adimento=leche_deslact, allowed=True))
         session.add(Platillo_UnAdimento(platillo=cafe, adimento=leche_semides, allowed=True))
 
-        huevos = Platillo(nombre='Huevos')
-
+        session.add(huevos)
         session.add(crepa)
         session.add(cafe)
-        session.add(huevos)
 
         session.commit()
 
