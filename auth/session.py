@@ -45,14 +45,14 @@ def close():
         close_active_session()
         session.commit()
 
-    response = Response(status=204) # 204 No Content
+    response = make_response({'success': True})
     response.set_cookie('sid', '', secure=True, httponly=True, expires=0)
 
     return response
 
 @bp.route('/get_login_token')
 def get_login_token():
-    response = {'token': generate_csrf_token()}
+    response = {'success': True, 'token': generate_csrf_token()}
     db.session.commit()
     return response
 

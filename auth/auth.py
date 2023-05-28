@@ -20,7 +20,7 @@ def create_user_session(user: str, passwd: str) -> UserSession | None:
     if email_re.fullmatch(user):
         identifier = UserAccount.email.ilike(user)
     elif username_re.fullmatch(user):
-        identifier = UserAccount.username.ilike(user)
+        identifier = UserAccount.username == user
     else:
         return None
 

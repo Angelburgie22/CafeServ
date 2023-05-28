@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, ForeignKey, UniqueConstraint, func, select
-from sqlalchemy import Integer, String, Boolean, DateTime, BINARY
+from sqlalchemy import Integer, String, Boolean, DateTime, BINARY, Float
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.mysql import TINYINT
 from view import view
@@ -109,4 +109,8 @@ class Pedido_Platillo(Model):
     adimento_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
     cantidad: Mapped[int] = mapped_column(Integer)
 
-
+class Pedido_Ubicacion(Model):
+    ubicacion_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    coord_x: Mapped[float] = mapped_column(Float)
+    coord_y: Mappped[float] = mapped_column(Float)
+    pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), unique=True)
