@@ -99,15 +99,15 @@ Platillo_Adimento = view('platillo_adimento', Model.metadata,
                               )
 
 class Pedido(Model):
-    id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True, unique=True)
+    id: Mapped[int] = mapped_column('pedido_id', Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id))
     status: Mapped[int] = mapped_column(TINYINT)
 
 class Pedido_Platillo(Model):
-    id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), primary_key=True)
-    platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
+    id: Mapped[int] = mapped_column('pedido_platillo_id', Integer, primary_key=True)
+    pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id))
+    platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id))
     cantidad: Mapped[int] = mapped_column(Integer)
-
 
     adimentos: Mapped[list["Pedido_Platillo_Adimento"]] = relationship()
 
