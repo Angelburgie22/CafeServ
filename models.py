@@ -104,9 +104,9 @@ class Pedido(Model):
     status: Mapped[int] = mapped_column(TINYINT)
 
 class Pedido_Platillo(Model):
+    id: Mapped[int] = mapped_column('pedido_platillo_id', Integer, primary_key=True)
     pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), primary_key=True)
     platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
-    adimento_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
     cantidad: Mapped[int] = mapped_column(Integer)
 
 class Pedido_Ubicacion(Model):
@@ -114,3 +114,7 @@ class Pedido_Ubicacion(Model):
     coord_x: Mapped[float] = mapped_column(Float)
     coord_y: Mappped[float] = mapped_column(Float)
     pedido_id: Mapped[int] = mapped_column(ForeignKey(Pedido.id), unique=True)
+
+class Pedido_Platillo_Adimento(Model):
+    pedido_platillo_id: Mapped[int] = mapped_column(ForeignKey(Pedido_Platillo.id), primary_key=True)
+    adimento_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
