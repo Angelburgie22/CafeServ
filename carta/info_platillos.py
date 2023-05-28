@@ -17,6 +17,7 @@ def info_platillo(platillo_id):
                     .filter(Platillo_Adimento.c.id_platillo == platillo.id)
 
     result = {
+            'success': True,
             'id': platillo.id,
             'nombre': platillo.nombre,
             'adimentos': [
