@@ -5,7 +5,7 @@ import os
 from database import db
 
 default_config = {
-        'database_uri': f'mysql+pymysql://mysql:{os.environ["MARIADB_PASSWD"]}@localhost/cafeserv?charset=utf8mb4',
+        'database_uri': f'mysql+pymysql://root:{os.environ["MARIADB_PASSWD"]}@localhost/cafeserv?charset=utf8mb4',
         'database_echo': True,
         'flask_app_name': __name__
         }
