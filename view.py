@@ -2,7 +2,7 @@
 import sqlalchemy as sa
 from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
-from sqlalchemy.sql import table
+from sqlalchemy.sql import table, column
 
 
 class CreateView(DDLElement):
@@ -38,11 +38,9 @@ def view_doesnt_exist(ddl, target, connection, **kw):
 
 
 def view(name, metadata, selectable):
-    t = table(name)
-
-    t._columns._populate_separate_keys(
-        col._make_proxy(t) for col in selectable.selected_columns
-    )
+    cols = [column(col.name, col.type) if hasattr(col, 'type') else column(col.name)
+            for col in selectable.selected_columns]
+    t = table(name, *cols)
 
     sa.event.listen(
         metadata,
