@@ -2,7 +2,7 @@ from flask import Blueprint
 from auth.auth import active_session_decorator as active_session
 import werkzeug.exceptions
 
-bp = Blueprint('api_carta', __name__, url_prefix='/api/carta')
+bp = Blueprint('api_menu', __name__, url_prefix='/api/menu')
 
 def unauthorized_handler_json(error):
     return {

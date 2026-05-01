@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from secrets import token_urlsafe
 from datetime import datetime, timedelta
 from database import db
-from models import UserAccount, UserSession, UserLoginInfo, CSRF_Token
+from models import UserAccount, UserSession, UserLoginInfo, CSRFToken
 import re
 
 email_re = re.compile(r"([\w\d._+?!#$%&^'~|\/(){}=*-])+@(((?<=@)|\.)[\w\d]+){2,}")

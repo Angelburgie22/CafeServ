@@ -1,6 +1,6 @@
 from flask import Flask, request, abort, redirect, url_for
 from auth.session import bp as session_bp
-from carta.info_platillos import bp as info_platillos_bp
+from menu.dish_info import bp as dish_info_bp
 import os
 from database import db
 
@@ -19,7 +19,7 @@ def create_app(config=default_config):
     db.init_app(app)
 
     app.register_blueprint(session_bp)
-    app.register_blueprint(info_platillos_bp)
+    app.register_blueprint(dish_info_bp)
 
     return app
 

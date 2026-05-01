@@ -1,5 +1,5 @@
 
-CREATE TABLE CSRF_Token (
+CREATE TABLE CSRFToken (
 	csrf_token CHAR(64) PRIMARY KEY
 );
 
@@ -10,9 +10,8 @@ CREATE TABLE UserAccount (
 	status        TINYINT NOT NULL;
 	email         VARCHAR(40) NOT NULL;
 	username      VARCHAR(24) NOT NULL;
-	nombre        VARCHAR(24) NOT NULL;
-	apellido_p    VARCHAR(24);
-	apellido_m    VARCHAR(24);
+	first_name        VARCHAR(24) NOT NULL;
+	last_name    VARCHAR(24) NOT NULL;
 
 	CONSTRAINT PRIMARY KEY(account_id);
 );

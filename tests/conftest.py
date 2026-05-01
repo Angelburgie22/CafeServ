@@ -1,5 +1,6 @@
 import pytest
 import sqlalchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash
 import os
 from app import create_app, default_config
@@ -9,7 +10,7 @@ from models import *
 @pytest.fixture
 def app():
     app = create_app(default_config | {
-        'database_uri': f'mysql+pymysql://mysql:{os.environ["MARIADB_PASSWD"]}@localhost/test_cafeserv?charset=utf8mb4',
+        'database_uri': f'mysql+pymysql://root:{os.environ["MARIADB_PASSWD"]}@localhost/test_cafeserv?charset=utf8mb4',
     })
 
     with app.app_context():
@@ -25,40 +26,40 @@ def app():
                     'status': 0,
                     'username': 'victor22',
                     'email': 'victor@torres.com',
-                    'nombre': 'victor',
-                    'apellido_p': 'torres',
+                    'first_name': 'victor',
+                    'last_name': 'torres',
                 },
         ]
 
         for kw in users:
             user = UserAccount(creation_time=func.now(), **kw)
-            passwd_hash = generate_password_hash('hola' + kw['nombre'])
+            passwd_hash = generate_password_hash('hola' + kw['first_name'])
             user_login = UserLoginInfo(passwd_hash=passwd_hash, account=user)
             session.add(user)
 
-        tipo_leche = TipoAdimento(nombre='Leche')
+        milk_type = IngredientType(name='Milk')
 
-        leche_entera = Adimento(nombre='Leche entera', tipo_adimento=tipo_leche)
-        leche_bronca = Adimento(nombre='Leche bronca', tipo_adimento=tipo_leche)
-        leche_deslact = Adimento(nombre='Leche deslactosada', tipo_adimento=tipo_leche)
-        leche_semides = Adimento(nombre='Leche semideslactosada', tipo_adimento=tipo_leche)
+        whole_milk = Ingredient(name='Whole Milk', type=milk_type)
+        raw_milk = Ingredient(name='Raw Milk', type=milk_type)
+        lactose_free_milk = Ingredient(name='Lactose-free Milk', type=milk_type)
+        semi_skimmed_milk = Ingredient(name='Semi-skimmed Milk', type=milk_type)
 
-        session.add(tipo_leche)
+        session.add(milk_type)
 
-        crepa = Platillo(nombre='Crepa')
-        session.add(Platillo_TipoAdimento(platillo=crepa, tipo_adimento=tipo_leche))
-        session.add(Platillo_UnAdimento(platillo=crepa, adimento=leche_semides, allowed=False))
+        crepe = Dish(name='Crepe')
+        session.add(DishIngredientType(dish=crepe, ingredient_type=milk_type))
+        session.add(DishIngredient(dish=crepe, ingredient=semi_skimmed_milk, allowed=False))
 
-        cafe = Platillo(nombre='Café')
-        session.add(Platillo_UnAdimento(platillo=cafe, adimento=leche_entera, allowed=True))
-        session.add(Platillo_UnAdimento(platillo=cafe, adimento=leche_deslact, allowed=True))
-        session.add(Platillo_UnAdimento(platillo=cafe, adimento=leche_semides, allowed=True))
+        coffee = Dish(name='Coffee')
+        session.add(DishIngredient(dish=coffee, ingredient=whole_milk, allowed=True))
+        session.add(DishIngredient(dish=coffee, ingredient=lactose_free_milk, allowed=True))
+        session.add(DishIngredient(dish=coffee, ingredient=semi_skimmed_milk, allowed=True))
 
-        huevos = Platillo(nombre='Huevos')
+        eggs = Dish(name='Eggs')
 
-        session.add(crepa)
-        session.add(cafe)
-        session.add(huevos)
+        session.add(crepe)
+        session.add(coffee)
+        session.add(eggs)
 
         session.commit()
 

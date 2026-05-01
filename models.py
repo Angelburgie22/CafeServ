@@ -13,9 +13,8 @@ class UserAccount(Model):
     status: Mapped[int] = mapped_column(TINYINT)
     email: Mapped[str] = mapped_column(String(40))
     username: Mapped[str] = mapped_column(String(24))
-    nombre: Mapped[str] = mapped_column(String(32))
-    apellido_p: Mapped[Optional[str]] = mapped_column(String(24))
-    apellido_m: Mapped[Optional[str]] = mapped_column(String(24))
+    first_name: Mapped[str] = mapped_column(String(32))
+    last_name: Mapped[str] = mapped_column(String(24))
 
     login_info: Mapped['UserLoginInfo'] = relationship(back_populates='account')
     logged_sessions: Mapped[list['UserSession']] = relationship(back_populates='account')
@@ -35,66 +34,66 @@ class UserSession(Model):
 
     account: Mapped[Optional['UserAccount']] = relationship(back_populates='logged_sessions')
 
-class CSRF_Token(Model):
+class CSRFToken(Model):
     __tablename__ = 'csrf_token'
     token: Mapped[bytes] = mapped_column('csrf_token', String(64), primary_key=True)
     creation_time: Mapped[Datetime] = mapped_column(DateTime, server_default=func.now())
     expiration_time: Mapped[Datetime] = mapped_column(DateTime)
 
 
-class Platillo(Model):
+class Dish(Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(40))
-    descripcion: Mapped[str] = mapped_column(String(250), default='')
+    name: Mapped[str] = mapped_column(String(40))
+    description: Mapped[str] = mapped_column(String(250), default='')
 
-class TipoAdimento(Model):
+class IngredientType(Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    nombre: Mapped[str] = mapped_column(String(40))
+    name: Mapped[str] = mapped_column(String(40))
 
-    adimentos: Mapped[list['Adimento']] = relationship(back_populates='tipo_adimento')
+    ingredients: Mapped[list['Ingredient']] = relationship(back_populates='type')
 
-class Adimento(Model):
+class Ingredient(Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    tipo_id: Mapped[int] = mapped_column(ForeignKey(TipoAdimento.id))
-    nombre: Mapped[str] = mapped_column(String(40))
+    type_id: Mapped[int] = mapped_column(ForeignKey(IngredientType.id))
+    name: Mapped[str] = mapped_column(String(40))
 
-    tipo_adimento: Mapped['TipoAdimento'] = relationship(back_populates='adimentos')
+    type: Mapped['IngredientType'] = relationship(back_populates='ingredients')
 
 
-class Platillo_UnAdimento(Model):
-    platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
-    adimento_id: Mapped[int] = mapped_column(ForeignKey(Adimento.id), primary_key=True)
+class DishIngredient(Model):
+    dish_id: Mapped[int] = mapped_column(ForeignKey(Dish.id), primary_key=True)
+    ingredient_id: Mapped[int] = mapped_column(ForeignKey(Ingredient.id), primary_key=True)
     allowed: Mapped[bool] = mapped_column(Boolean)
 
-    platillo: Mapped['Platillo'] = relationship()
-    adimento: Mapped['Adimento'] = relationship()
+    dish: Mapped['Dish'] = relationship()
+    ingredient: Mapped['Ingredient'] = relationship()
 
-class Platillo_TipoAdimento(Model):
-    platillo_id: Mapped[int] = mapped_column(ForeignKey(Platillo.id), primary_key=True)
-    tipo_adimento_id: Mapped[int] = mapped_column(ForeignKey(TipoAdimento.id), primary_key=True)
+class DishIngredientType(Model):
+    dish_id: Mapped[int] = mapped_column(ForeignKey(Dish.id), primary_key=True)
+    ingredient_type_id: Mapped[int] = mapped_column(ForeignKey(IngredientType.id), primary_key=True)
 
-    platillo: Mapped['Platillo'] = relationship()
-    tipo_adimento: Mapped['TipoAdimento'] = relationship()
+    dish: Mapped['Dish'] = relationship()
+    ingredient_type: Mapped['IngredientType'] = relationship()
 
-fulladim_subq = select(
-                        Platillo.id.label('id_platillo'),
-                        Adimento.id.label('id_adimento'),
-                        Adimento.nombre.label('nombre'),
-                        Platillo_UnAdimento.allowed.label('allowed')
-                    ).join(Platillo).join(Adimento)\
+full_dish_ingredient_subq = select(
+                        Dish.id.label('id_dish'),
+                        Ingredient.id.label('id_ingredient'),
+                        Ingredient.name.label('name'),
+                        DishIngredient.allowed.label('allowed')
+                    ).join(Dish).join(Ingredient)\
                     .union(
                             select(
-                                Platillo.id,
-                                Adimento.id,
-                                Adimento.nombre,
+                                Dish.id,
+                                Ingredient.id,
+                                Ingredient.name,
                                 True)
-                            .join(TipoAdimento).join(Platillo_TipoAdimento).join(Platillo)
+                            .join(IngredientType).join(DishIngredientType).join(Dish)
                         ).subquery()
 
 
-Platillo_Adimento = view('platillo_adimento', Model.metadata,
-                              select(fulladim_subq.c.id_platillo, fulladim_subq.c.id_adimento, fulladim_subq.c.nombre)
-                              .group_by(fulladim_subq.c.id_platillo, fulladim_subq.c.id_adimento)
-                              .having(func.min(fulladim_subq.c.allowed))
+DishIngredientView = view('dish_ingredient_view', Model.metadata,
+                              select(full_dish_ingredient_subq.c.id_dish, full_dish_ingredient_subq.c.id_ingredient, full_dish_ingredient_subq.c.name)
+                              .group_by(full_dish_ingredient_subq.c.id_dish, full_dish_ingredient_subq.c.id_ingredient)
+                              .having(func.min(full_dish_ingredient_subq.c.allowed))
                               )
 
