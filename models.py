@@ -22,7 +22,7 @@ class UserAccount(Model):
 class UserLoginInfo(Model):
     account_id: Mapped[int] = mapped_column(ForeignKey(UserAccount.id),
                                     primary_key=True)
-    passwd_hash: Mapped[bytes] = mapped_column(String(128))
+    passwd_hash: Mapped[str] = mapped_column(String(255))
 
     account: Mapped['UserAccount'] = relationship(back_populates='login_info')
 

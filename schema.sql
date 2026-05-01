@@ -18,8 +18,7 @@ CREATE TABLE UserAccount (
 
 CREATE TABLE UserLogin (
 	account_id INT NOT NULL;
-	passwd_hash BINARY() NOT NULL;
-	passwd_salt BINARY() NOT NULL;
+	passwd_hash VARCHAR(255) NOT NULL;
 	CONSTRAINT PRIMARY KEY(account_id);
 	CONSTRAINT FK_UserLogin_User FOREIGN KEY (account_id)
 	REFERENCES UserAccount(account_id);
